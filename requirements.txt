@@ -1,0 +1,16 @@
+flask
+gunicorn
+scikit-learn
+traceback2
+numpy
+re
+pickle
+joblib
+traceback
+click
+itsdangerous
+Jinja2
+MarkupSafe
+itsdangerous
+Jinja2
+Werkzeug
