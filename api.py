@@ -17,6 +17,59 @@ def cleanResume(resumeText):
     resumeText = re.sub(r'[^\x00-\x7f]',r' ', resumeText) 
     resumeText = re.sub('\s+', ' ', resumeText)
     return resumeText
+def find_prof(num):
+    if num==0:
+        return 'Advocate'
+    elif num==1:
+        return 'Arts'
+    elif num==2:
+        return 'Automation Testing'
+    elif num==3:
+        return 'Blockchain'
+    elif num==4:
+        return 'Business Analyst'
+    elif num==5:
+        return 'Civil Engineer'
+    elif num==6:
+        return 'Data Science'
+    elif num==7:
+        return 'Database'
+    elif num==8:
+        return 'DevOps Engineer'
+    elif num==9:
+        return 'DotNet Developer'
+    elif num==10:
+        return 'ETL Developer'
+    elif num==11:
+        return 'Electrical Engineering'
+    elif num==12:
+        return 'HR'
+    elif num==13:
+        return 'Hadoop'
+    elif num==14:
+        return 'Health and fitness'
+    elif num==15:
+        return 'Java Developer'
+    elif num==16:
+        return 'Mechanical Engineer'
+    elif num==17:
+        return 'Network Security Engineer'
+    elif num==18:
+        return 'Operations Manager'
+    elif num==19:
+        return 'PMO'
+    elif num==20:
+        return 'Python Developer'
+    elif num==21:
+        return 'SAP Developer'
+    elif num==22:
+        return 'Sales'
+    elif num==23:
+        return 'Testing'
+    elif num==24:
+        return 'Web Designing'
+    
+
 
 
 # Your API definition
@@ -36,32 +89,11 @@ def result():
       x=np.append(x,preprocess)
       word_vectorizer = TfidfVectorizer(sublinear_tf=True,stop_words='english',max_features=1500)
       WordFeatures = word_vectorizer.fit_transform(x)
-      answer=clf.predict(WordFeatures[962])[0]
-      return render_template("home.html",result = 'It feels like this resume should belong to '+str(answer)+' departmet')
+      answer=find_prof(clf.predict(WordFeatures[962])[0])
+      return render_template("home.html",result = 'It feels like this resume should belong to '+answer+' departmet')
 
-# @app.route('/test')
-# def hello_world():
-#     return 'Hello, World!'
-
-# @app.route('/predict', methods=['POST'])
-# def predict():
-# #     if lr:
-#     try:
-#         lr = load_model('modelwc6.h5')
-#         json_ = request.json
-#         print(json_)
-#         query = pd.DataFrame(json_)
-#         # query = query.reindex(columns=model_columns, fill_value=0)
-
-#         prediction = list(lr.predict_classes(query))
-
-#         return jsonify({'prediction': str(prediction)})
-
-
-#     except:
-
-#         return jsonify({'trace': traceback.format_exc()})
 if __name__ == '__main__':
 
     app.run()
+    
     
