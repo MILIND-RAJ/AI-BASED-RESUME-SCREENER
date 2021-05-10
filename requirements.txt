@@ -3,7 +3,6 @@ gunicorn
 scikit-learn
 traceback2
 numpy
-re
 pickle
 joblib
 traceback
