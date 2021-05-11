@@ -73,11 +73,11 @@ def find_prof(num):
 
 
 # Your API definition
-app = Flask(__name__)
+app = Flask(__name__,static_url_path='/static')
 
 @app.route('/')
 def home():
-    return render_template('home.html')
+    return render_template('index.html')
 
 @app.route('/result',methods = ['POST', 'GET'])
 def result():
@@ -90,7 +90,7 @@ def result():
       word_vectorizer = TfidfVectorizer(sublinear_tf=True,stop_words='english',max_features=1500)
       WordFeatures = word_vectorizer.fit_transform(x)
       answer=find_prof(clf.predict(WordFeatures[962])[0])
-      return render_template("home.html",result = 'It feels like this resume should belong to '+answer+' departmet')
+      return render_template("index.html",result = 'It feels like this resume should belong to '+answer+' department')
 
 if __name__ == '__main__':
 
