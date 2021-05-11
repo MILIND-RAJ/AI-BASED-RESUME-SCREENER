@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>Aisume - Resume Screener</title>
+
+		
+		<!-- WEB FONTS -->
+		<link href='http://fonts.googleapis.com/css?family=Roboto:100,300,100italic,400,300italic' rel='stylesheet' type='text/css'>
+		<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300' rel='stylesheet' type='text/css'>
+		
+		<!-- BOOTSTRAP -->
+		<link href="../static/css/bootstrap.min.css" rel="stylesheet">
+		<!-- FONT AWESOME -->
+		<link rel="stylesheet" href="../static/css/font-awesome.min.css">
+		<!-- CUSTOM STYLING -->
+		<link href="../static/css/styles.css" rel="stylesheet">
+		<!-- PRELOADER -->	
+		<link href="../static/css/loader.css" rel="stylesheet">
+			
+	</head>
+	
+<body>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/1.10.100/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.worker.entry.min.js" ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/1.10.100/pdf.worker.min.js"></script>
+	<script>
+		var datass = '';
+		var DataArr = [];
+		var finaltext='';
+		PDFJS.workerSrc = '';
+
+		function ExtractText() {
+			var input = document.getElementById("file-id");
+			var fReader = new FileReader();
+			fReader.readAsDataURL(input.files[0]);
+			// console.log(input.files[0]);
+			fReader.onloadend = function (event) {
+				convertDataURIToBinary(event.target.result);
+			}
+		}
+
+		var BASE64_MARKER = ';base64,';
+
+		function convertDataURIToBinary(dataURI) {
+
+			var base64Index = dataURI.indexOf(BASE64_MARKER) + BASE64_MARKER.length;
+			var base64 = dataURI.substring(base64Index);
+			var raw = window.atob(base64);
+			var rawLength = raw.length;
+			var array = new Uint8Array(new ArrayBuffer(rawLength));
+
+			for (var i = 0; i < rawLength; i++) {
+				array[i] = raw.charCodeAt(i);
+			}
+			pdfAsArray(array)
+
+		}
+
+		function getPageText(pageNum, PDFDocumentInstance) {
+			// Return a Promise that is solved once the text of the page is retrieven
+			return new Promise(function (resolve, reject) {
+				PDFDocumentInstance.getPage(pageNum).then(function (pdfPage) {
+					// The main trick to obtain the text of the PDF page, use the getTextContent method
+					pdfPage.getTextContent().then(function (textContent) {
+						var textItems = textContent.items;
+						var finalString = "";
+
+						// Concatenate the string of the item to the final string
+						for (var i = 0; i < textItems.length; i++) {
+							var item = textItems[i];
+
+							finalString += item.str + " ";
+						}
+
+						// Solve promise with the text retrieven from the page
+						resolve(finalString);
+					});
+				});
+			});
+		}
+
+		function pdfAsArray(pdfAsArray) {
+
+			PDFJS.getDocument(pdfAsArray).then(function (pdf) {
+
+				var pdfDocument = pdf;
+				// Create an array that will contain our promises
+				var pagesPromises = [];
+
+				for (var i = 0; i < pdf.pdfInfo.numPages; i++) {
+					// Required to prevent that i is always the total of pages
+					(function (pageNumber) {
+						// Store the promise of getPageText that returns the text of a page
+						pagesPromises.push(getPageText(pageNumber, pdfDocument));
+					})(i + 1);
+				}
+
+				// Execute all the promises
+				Promise.all(pagesPromises).then(function (pagesText) {
+
+					// Display text of all the pages in the console
+					// e.g ["Text content page 1", "Text content page 2", "Text content page 3" ... ]
+					// console.log(pagesText); // representing every single page of PDF Document by array indexing
+					// console.log(pagesText.length);
+					var outputStr = "";
+					document.getElementById("ansbtn").disabled = false;
+					for (var pageNum = 0; pageNum < pagesText.length; pageNum++) {
+						// console.log(pagesText[pageNum]);
+						outputStr = "";
+						outputStr = "<br/><br/>Page " + (pageNum + 1) + " contents <br/> <br/>";
+
+						// var div = document.getElementById('output');
+
+						// div.innerHTML += (outputStr + pagesText[pageNum]);
+						finaltext += pagesText[pageNum];
+
+					}
+					// console.log(typeof finaltext);
+
+
+
+
+				});
+
+			}, function (reason) {
+				// PDF loading error
+				var div1 = document.getElementById('errorout');
+				div1.innerHTML = "Please Upload a PDF File (Incorrect Format)";
+				document.getElementById("ansbtn").disabled = true;
+				console.error(reason);
+			});
+		}
+		function myFunction() {
+	document.getElementById("btntext").value = finaltext;
+}
+		// var inputF = document.getElementById("btntext");
+		// document.getElementById('btntext').value=finaltext;
+	</script>
+
+
+	<!-- PRELOADER -->
+		<div id="loader-wrapper">
+			<div id="loader"><div class="sk-spinner sk-spinner-cube-grid"><div class="sk-cube"></div><div class="sk-cube"></div><div class="sk-cube"></div><div class="sk-cube"></div><div class="sk-cube"></div><div class="sk-cube"></div><div class="sk-cube"></div><div class="sk-cube"></div><div class="sk-cube"></div></div></div>
+		</div>	
+		
+	<!-- HEADER -->
+		<section id="header">
+			<div class="container">
+				<div class="row text-center">
+					<div class="col-md-8">
+						<img class="logo" src="../static/images/logo.png" />
+						<h1 class="white-text">AI Based Resume Screener</h1>
+						<h5 class="white-text">Choose a Resume file in pdf format</h5>
+						<center><input type="file" id="file-id" name="file_name" onchange="ExtractText();"></center>
+						<br>
+					<form action='/result' method="POST">
+						<input id="btntext" name="cancel_var" type='hidden' value="123456">
+						<button type="submit" id="ansbtn" onclick='myFunction()'class="button-leweb">Find</button>
+						<!-- <label for="mc-email" class="mc-email"></label> -->
+					</form>
+					<br>
+					<div class="white-text" id="errorout"></div>
+					<h3 class="white-text">{{result}}</h3>
+						<div id="countdown" class="white-text"></div>
+					</div>
+				</div>
+			</div>
+			<div class="animation">
+			<a class="arrow-down-animation" data-scroll href="#about"><i class="fa fa-angle-down"></i></a>
+			</div>
+		</section>
+	<!-- HEADER ENDS -->
+	<!-- FOOTER -->
+		<footer id="footer">
+			<div class="container">
+				<div class="row text-center">	
+					<p>
+						&copy; CREATED BY <a href="https://www.linkedin.com/in/milind-raj-a452991a5/">MILIND RAJ</a>
+					</p>
+				</div>
+			</div>		
+		</footer>
+	<!-- FOOTER ENDS -->	
+
+	
+		<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+		<!-- Include all compiled plugins (below), or include individual files as needed -->
+		<script src="../static/js/bootstrap.min.js"></script>
+		<!-- SMOOTH SCROLL -->
+		<script src="../static/js/smooth-scroll.min.js"></script>
+		<!-- PARALLAX IMG -->
+		<script src="../static/js/jquery.parallax-1.1.3.js"></script>
+		<!-- SCROLL REVEAL -->
+		<script src="../static/js/scrollReveal.min.js"></script>
+		<!-- FUNCTIONS -->
+		<script src="../static/js/functions.js"></script>
+
+</body>
+</html>
